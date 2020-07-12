@@ -1,7 +1,7 @@
 import * as React from "react"
 import { UseSliderProps } from "@chakra-ui/slider"
-import { useBoolean, useControllableState } from "@chakra-ui/hooks"
-import { valueToPercent, Dict, merge } from "@chakra-ui/utils"
+import { Dict, merge } from "@chakra-ui/utils"
+import { useSliderValue } from "./use-slider-value"
 
 export type NumberTuple = [number, number]
 
@@ -19,7 +19,7 @@ export type UseRangeSliderProps = Omit<
 export const useRangeSlider = (props: UseRangeSliderProps) => {
   const {
     values: valuesProp,
-    defaultValues,
+    defaultValues: defaultValuesProp,
     isDisabled,
     isReadOnly,
     onChange,
@@ -27,22 +27,28 @@ export const useRangeSlider = (props: UseRangeSliderProps) => {
     max = 100,
   } = props
 
-  const [isDragging, setDragging] = useBoolean()
-  const [eventSource, setEventSource] = React.useState<EventSource>()
+  const defaultValues = defaultValuesProp ?? getDefaultValues(min, max)
 
-  const isInteractive = !(isDisabled || isReadOnly)
-
-  const [computedValue, setValue] = useControllableState({
-    value: valuesProp,
-    defaultValue: defaultValues ?? getDefaultValues(min, max),
-    onChange,
-    shouldUpdate: (prev, next) => prev[0] === next[0] && prev[1] === next[1],
-  })
+  const valuesState = [
+    useSliderValue({
+      value: valuesProp ? valuesProp[0] : valuesProp,
+      defaultValue: defaultValues[0],
+      min,
+      max,
+    }),
+    useSliderValue({
+      value: valuesProp ? valuesProp[1] : valuesProp,
+      defaultValue: defaultValues[1],
+      min,
+      max,
+    }),
+  ]
 
   const trackValues = [
-    valueToPercent(computedValue[0], min, max),
-    valueToPercent(computedValue[1], min, max),
+    valuesState[0].percentForValue,
+    valuesState[1].percentForValue,
   ]
+
   const filledTrackStyles: React.CSSProperties =
     trackValues[0] < trackValues[1]
       ? {
@@ -58,6 +64,11 @@ export const useRangeSlider = (props: UseRangeSliderProps) => {
     getFilledTrackProps: (props: Dict = {}) => ({
       style: merge<React.CSSProperties>(props.style, filledTrackStyles),
     }),
+    getThumbProps: (props: Dict = {}) =>
+      valuesState.map((s) => ({
+        ref: s.thumbRef,
+        style: merge<React.CSSProperties>(props.style, s.thumbStyle),
+      })),
   }
 }
 

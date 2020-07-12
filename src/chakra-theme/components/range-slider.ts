@@ -1,6 +1,6 @@
 import { ComponentTheme, mode, orient } from "@chakra-ui/theme-tools"
 
-const Slider: ComponentTheme = {
+const RangeSlider: ComponentTheme = {
   defaultProps: {
     size: "md",
     colorScheme: "blue",
@@ -113,4 +113,4 @@ export const SliderSizes = {
   md: "md",
 }
 
-export default Slider
+export default RangeSlider

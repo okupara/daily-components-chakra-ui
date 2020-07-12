@@ -9,6 +9,7 @@ import {
   RangeSlider,
   RangeSliderTrack,
   RangeSliderFilledTrack,
+  RangeSliderThumbs,
 } from "./range-slider"
 import { Progress, ProgressLabel } from "@chakra-ui/progress"
 import { Box } from "@chakra-ui/core"
@@ -19,6 +20,7 @@ export const rangeSlider = () => (
       <RangeSliderTrack>
         <RangeSliderFilledTrack />
       </RangeSliderTrack>
+      <RangeSliderThumbs />
     </RangeSlider>
   </Box>
 )
