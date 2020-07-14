@@ -1,7 +1,7 @@
 import * as React from "react"
 import { useId } from "@chakra-ui/hooks"
 import { useControllableState } from "@chakra-ui/hooks"
-import { valueToPercent, Dict, merge } from "@chakra-ui/utils"
+import { valueToPercent, clampValue } from "@chakra-ui/utils"
 import { useDimensions, useBoolean } from "@chakra-ui/hooks"
 
 export type SliderValueProps = {
@@ -9,11 +9,15 @@ export type SliderValueProps = {
   defaultValue?: number
   min?: number
   max?: number
-  onChange?: (value: number) => void
+  onChange: (value: number) => void
 }
 
 export const useSliderValue = (props: SliderValueProps) => {
   const { value: valueProp, defaultValue, min = 0, max = 100, onChange } = props
+  const [isDragging, setDragging] = useBoolean()
+  const [isFocused, setFocused] = useBoolean()
+  const [eventSource, setEventSource] = React.useState<RangeSliderEventSource>()
+  const prev = React.useRef<number>()
 
   const [computedValue, setValue] = useControllableState({
     value: valueProp,
@@ -21,7 +25,7 @@ export const useSliderValue = (props: SliderValueProps) => {
     onChange,
     shouldUpdate: (prev, next) => prev !== next,
   })
-  // const [isDragging, setDragging] = useBoolean()
+  const value = clampValue(computedValue, min, max)
 
   const thumbRef = React.useRef<HTMLDivElement>(null)
 
@@ -40,15 +44,25 @@ export const useSliderValue = (props: SliderValueProps) => {
 
   const id = useId("range-slider-thumb")
 
+  const updateValue = (newValue: number, eventSource: RangeSliderEventSource) => {
+    if (newValue === value) return
+
+    setValue(newValue)
+    setEventSource(eventSource)
+  }
+
   return {
     thumbRef,
     id,
     value: computedValue,
     percentForValue,
     thumbStyle,
+    updateValue,
   }
 }
 
 function getDefaultValue(min: number, max: number) {
   return max < min ? min : min + (max - min) / 2
 }
+
+export type ReturnUseValueType = ReturnType<typeof useSliderValue>

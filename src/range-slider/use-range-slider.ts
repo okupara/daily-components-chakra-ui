@@ -1,7 +1,8 @@
 import * as React from "react"
 import { UseSliderProps } from "@chakra-ui/slider"
-import { Dict, merge } from "@chakra-ui/utils"
+import { Dict, merge, mergeRefs } from "@chakra-ui/utils"
 import { useSliderValue } from "./use-slider-value"
+import { useDomEvents } from "./use-dom-events"
 
 export type NumberTuple = [number, number]
 
@@ -25,29 +26,42 @@ export const useRangeSlider = (props: UseRangeSliderProps) => {
     onChange,
     min = 0,
     max = 100,
+    step = 1,
   } = props
 
-  const defaultValues = defaultValuesProp ?? getDefaultValues(min, max)
+  const rootRef = React.useRef<HTMLDivElement | null>(null)
+  const trackRef = React.useRef<HTMLDivElement | null>(null)
 
+  const defaultValues = defaultValuesProp ?? getDefaultValues(min, max)
   const valuesState = [
     useSliderValue({
       value: valuesProp ? valuesProp[0] : valuesProp,
       defaultValue: defaultValues[0],
       min,
       max,
+      onChange: () => {},
     }),
     useSliderValue({
       value: valuesProp ? valuesProp[1] : valuesProp,
       defaultValue: defaultValues[1],
       min,
       max,
+      onChange: () => {},
     }),
   ]
 
-  const trackValues = [
-    valuesState[0].percentForValue,
-    valuesState[1].percentForValue,
-  ]
+  const trackValues = [valuesState[0].value, valuesState[1].value] as const
+
+  const { rootDomRef, trackDomRef } = useDomEvents({
+    min,
+    max,
+    step,
+    valueStateTuple: [
+      { value: valuesState[0].value, updateValue: valuesState[0].updateValue },
+      { value: valuesState[1].value, updateValue: valuesState[1].updateValue },
+    ],
+    isInteractive: true,
+  })
 
   const filledTrackStyles: React.CSSProperties =
     trackValues[0] < trackValues[1]
@@ -61,14 +75,29 @@ export const useRangeSlider = (props: UseRangeSliderProps) => {
         }
 
   return {
+    getRootProps: (props: Dict = {}) => ({
+      ...props,
+      ref: mergeRefs(props.ref, rootDomRef),
+    }),
+    getTrackProps: (props: Dict = {}) => ({
+      ...props,
+      ref: mergeRefs(props.ref, trackDomRef),
+    }),
     getFilledTrackProps: (props: Dict = {}) => ({
+      ...props,
       style: merge<React.CSSProperties>(props.style, filledTrackStyles),
     }),
     getThumbProps: (props: Dict = {}) =>
       valuesState.map((s) => ({
+        ...props,
         ref: s.thumbRef,
         style: merge<React.CSSProperties>(props.style, s.thumbStyle),
       })),
+    getInputProps: (props: Dict = {}) => ({
+      ...props,
+      type: "hidden",
+    }),
+    getValues: () => [valuesState[0].value, valuesState[1].value],
   }
 }
 
