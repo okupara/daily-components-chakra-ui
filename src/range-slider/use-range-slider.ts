@@ -61,6 +61,7 @@ export const useRangeSlider = (props: UseRangeSliderProps) => {
       { value: valuesState[1].value, updateValue: valuesState[1].updateValue },
     ],
     isInteractive: true,
+    value0: valuesState[0].value,
   })
 
   const filledTrackStyles: React.CSSProperties =

@@ -1,7 +1,7 @@
 import * as React from "react"
 import { ReturnUseValueType } from "./use-slider-value"
 import { getBox, percentToValue, Dict } from "@chakra-ui/utils"
-import { useBoolean, useEventListener } from "@chakra-ui/core"
+import { useBoolean, useEventListener, useEventCallback } from "@chakra-ui/core"
 
 type ValueState = Pick<ReturnUseValueType, "value" | "updateValue">
 export type ValueStateTuple = [ValueState, ValueState]
@@ -13,10 +13,11 @@ export type UseDomEventsProps = {
   step: number
   valueStateTuple: ValueStateTuple
   isInteractive: boolean
+  value0: number
 }
 
 export const useDomEvents = (props: UseDomEventsProps) => {
-  const { valueStateTuple, isInteractive, min, max, step } = props
+  const { valueStateTuple, isInteractive, min, max, step, value0 } = props
 
   const rootDomRef = React.useRef<HTMLDivElement | null>(null)
   const trackDomRef = React.useRef<HTMLDivElement | null>(null)
@@ -24,7 +25,7 @@ export const useDomEvents = (props: UseDomEventsProps) => {
   const cleanupRef = React.useRef<Dict<Function>>({})
 
   const [isDragging, setDragging] = useBoolean(false)
-  const currentValuesRef = React.useRef<[number, number]>([
+  const prevValuesRef = React.useRef<[number, number]>([
     valueStateTuple[0].value,
     valueStateTuple[1].value,
   ])
@@ -43,16 +44,20 @@ export const useDomEvents = (props: UseDomEventsProps) => {
     [min, max, step],
   )
 
-  const onMouseDown = (event: MouseEvent) => {
+  // make sure to keep the newest values
+  // since "onMouseDown" captures the values when user click thumbs, the valueStateTuple inside of "run" function will be old during dragging
+  prevValuesRef.current = [valueStateTuple[0].value, valueStateTuple[1].value]
+
+  // const onMouseDown = (event: MouseEvent) => {
+  const onMouseDown = useEventCallback((event: MouseEvent) => {
     if (!isInteractive || !rootDomRef.current) return
     setDragging.on()
 
-    currentValuesRef.current = [valueStateTuple[0].value, valueStateTuple[1].value]
-
     const run = (event: MouseEvent) => {
       const nextValue = getValueFromPointer(event)
-      if (nextValue && !currentValuesRef.current?.includes(nextValue)) {
-        const index = findClosestIndex(nextValue, currentValuesRef.current)
+      if (nextValue && !prevValuesRef.current?.includes(nextValue)) {
+        const index = findClosestIndex(nextValue, prevValuesRef.current)
+
         valueStateTuple[index].updateValue(nextValue, "mouse")
       }
     }
@@ -71,9 +76,13 @@ export const useDomEvents = (props: UseDomEventsProps) => {
     cleanupRef.current.mouseup = () => {
       doc.removeEventListener("mouseup", detachMousemmove)
     }
-  }
+  })
 
-  cleanupRef.current.mouseDown = useEventListener("mousedown", onMouseDown)
+  cleanupRef.current.mouseDown = useEventListener(
+    "mousedown",
+    onMouseDown,
+    rootDomRef.current as Document | null,
+  )
 
   return {
     rootDomRef,
