@@ -3,6 +3,7 @@ import { UseSliderProps } from "@chakra-ui/slider"
 import { Dict, merge, mergeRefs } from "@chakra-ui/utils"
 import { useSliderValue } from "./use-slider-value"
 import { useDomEvents } from "./use-dom-events"
+import { useUpdateEffect } from "@chakra-ui/core"
 
 export type NumberTuple = [number, number]
 
@@ -51,6 +52,10 @@ export const useRangeSlider = (props: UseRangeSliderProps) => {
   ]
 
   const trackValues = [valuesState[0].value, valuesState[1].value] as const
+
+  useUpdateEffect(() => {
+    onChange?.(trackValues as NumberTuple)
+  }, trackValues)
 
   const { rootDomRef, trackDomRef } = useDomEvents({
     min,

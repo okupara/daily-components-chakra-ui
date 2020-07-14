@@ -16,7 +16,7 @@ import { Box } from "@chakra-ui/core"
 
 export const rangeSlider = () => (
   <Box mt={8}>
-    <RangeSlider>
+    <RangeSlider onChange={(a: any) => console.log("onchange", a)}>
       <RangeSliderTrack>
         <RangeSliderFilledTrack />
       </RangeSliderTrack>
