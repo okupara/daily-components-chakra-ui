@@ -28,7 +28,8 @@ const StyledRangeSlider = chakra("div", {
   },
 })
 
-type RangeSliderProps = UseRangeSliderProps & PropsOf<typeof StyledRangeSlider>
+type RangeSliderProps = UseRangeSliderProps &
+  StrictOmit<PropsOf<typeof StyledRangeSlider>, "onChange">
 
 const RangeSliderComponent = React.forwardRef(function RangeSlider(
   props: RangeSliderProps,
