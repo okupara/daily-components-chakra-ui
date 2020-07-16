@@ -31,6 +31,7 @@ import Textarea from "./textarea"
 import Stat from "./stat"
 import Skeleton from "./skeleton"
 import RangeSlider from "./range-slider"
+import NumberPicker from "./number-picker"
 
 export default {
   Accordion,
@@ -67,4 +68,5 @@ export default {
   Stat,
   Skeleton,
   RangeSlider,
+  NumberPicker,
 }
