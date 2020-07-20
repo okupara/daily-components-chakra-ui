@@ -1,7 +1,13 @@
 import * as React from "react"
-import { chakra, useThemeDefaultProps, ThemingProvider } from "@chakra-ui/system"
+import {
+  chakra,
+  useStyles,
+  useStyleConfig,
+  PropsOf,
+  StylesProvider,
+  omitThemingProps,
+} from "@chakra-ui/system"
 import { createContext } from "@chakra-ui/utils"
-import { PropsOf, useThemingContext } from "@chakra-ui/system"
 import {
   UseRangeSliderProps,
   ReturnUseRangeType,
@@ -21,101 +27,74 @@ const [RangeSliderProvider, useRangeSliderContext] = createContext<
 })
 export { RangeSliderProvider, useRangeSliderContext }
 
-const StyledRangeSlider = chakra("div", {
-  themeKey: "RangeSlider.Root",
-  baseStyle: {
-    position: "relative",
-  },
-})
-
 type RangeSliderProps = UseRangeSliderProps &
-  StrictOmit<PropsOf<typeof StyledRangeSlider>, "onChange">
+  StrictOmit<PropsOf<typeof chakra.div>, "onChange">
 
 const RangeSliderComponent = React.forwardRef(function RangeSlider(
   props: RangeSliderProps,
   ref: React.Ref<any>,
 ) {
-  const defaults = useThemeDefaultProps("RangeSlider")
-
-  const {
-    variant = defaults?.variant,
-    size = defaults?.size,
-    orientation = "horizontal",
-    colorScheme,
-    ...sliderProps
-  } = props
-  const themingProps = { variant, colorScheme, size, orientation }
-  const { getInputProps, getRootProps, getValues, ...context } = useRangeSlider({
-    ...sliderProps,
-    orientation,
-  })
+  const realProps = omitThemingProps(props)
+  const { getInputProps, getRootProps, getValues, ...context } = useRangeSlider(
+    realProps,
+  )
+  const styles = useStyleConfig("RangeSlider", props)
 
   return (
     <RangeSliderProvider value={context}>
-      <ThemingProvider value={themingProps}>
-        <StyledRangeSlider
+      <StylesProvider value={styles}>
+        <chakra.div
           className="chakra-range-slider"
           {...getRootProps()}
-          {...themingProps}
+          __css={styles.root}
         >
           {props.children}
-        </StyledRangeSlider>
-      </ThemingProvider>
+        </chakra.div>
+      </StylesProvider>
     </RangeSliderProvider>
   )
 })
 
-const StyledRangeSliderTrack = chakra("div", {
-  themeKey: "RangeSlider.Track",
-  baseStyle: {
-    overflow: "hidden",
-  },
-})
-
-export type RangeSliderTrackProps = PropsOf<typeof StyledRangeSliderTrack>
+export type RangeSliderTrackProps = PropsOf<typeof chakra.div>
 
 export const RangeSliderTrack = (props: RangeSliderTrackProps) => {
   const { getTrackProps } = useRangeSliderContext()
-  const themingProps = useThemingContext()
+  const styles = useStyles()
 
   return (
-    <StyledRangeSliderTrack
+    <chakra.div
       className="chakra-rangeslider__track"
-      {...themingProps}
       {...getTrackProps(props)}
+      __css={{
+        overflow: "hidden",
+        ...styles.rangeSliderTrack,
+      }}
     />
   )
 }
 
-const StyledRangeSliderFilledTrack = chakra("div", {
-  themeKey: "RangeSlider.FilledTrack",
-  baseStyle: {
-    width: "inherit",
-    height: "inherit",
-  },
-})
-
-export const RangeSliderFilledTrack = (
-  props: PropsOf<typeof StyledRangeSliderFilledTrack>,
-) => {
+export const RangeSliderFilledTrack = (props: PropsOf<typeof chakra.div>) => {
   const { getFilledTrackProps } = useRangeSliderContext()
-  const themingProps = useThemingContext()
+  const styles = useStyles()
   return (
-    <StyledRangeSliderFilledTrack
+    <chakra.div
       className="chakra-rangeslider__filled-track"
-      {...themingProps}
       {...getFilledTrackProps(props)}
+      __css={{
+        overflow: "hidden",
+        ...styles.rangeSliderFilledTrack,
+      }}
     />
   )
 }
 
 const StyledRangeSliderThumb = chakra("div", {
-  themeKey: "RangeSlider.Thumb",
   baseStyle: {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     position: "absolute",
+    top: "50%",
     outline: 0,
   },
 })
@@ -123,14 +102,14 @@ const StyledRangeSliderThumb = chakra("div", {
 export type StyledRangeSliderThubProps = PropsOf<typeof StyledRangeSliderThumb>
 
 export const RangeSliderThumbs = (props: StyledRangeSliderThubProps) => {
-  const themingProps = useThemingContext()
   const { getThumbProps } = useRangeSliderContext()
   const [thumbProps1, thumbProps2] = getThumbProps(props)
+  const styles = useStyles()
 
   return (
     <React.Fragment>
-      <StyledRangeSliderThumb {...themingProps} {...thumbProps1} />
-      <StyledRangeSliderThumb {...themingProps} {...thumbProps2} />
+      <StyledRangeSliderThumb __css={styles.rangeSliderThumb} {...thumbProps1} />
+      <StyledRangeSliderThumb __css={styles.rangeSliderThumb} {...thumbProps2} />
     </React.Fragment>
   )
 }

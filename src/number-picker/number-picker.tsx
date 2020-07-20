@@ -1,6 +1,14 @@
 import * as React from "react"
-import { chakra, PropsOf } from "@chakra-ui/system"
+import {
+  chakra,
+  PropsOf,
+  useStyles,
+  useStyleConfig,
+  StylesProvider,
+} from "@chakra-ui/system"
 import { VStack } from "@chakra-ui/layout"
+import { TriangleUpIcon } from "@chakra-ui/icons"
+import { IconButton } from "@chakra-ui/button"
 import {
   useNumberPicker,
   NumberPickerProvider,
@@ -14,43 +22,64 @@ export type NumberPickerProps = UseNumberPickerProps & {
 }
 
 export const NumberPicker = (props: NumberPickerProps) => {
-  const context = useNumberPicker(props)
+  const { value, defaultValue, children, ...rest } = props
+
+  const context = useNumberPicker({ value, defaultValue })
+  const styles = useStyleConfig("NumberPicker", props)
 
   return (
-    <NumberPickerProvider value={context}>{props.children}</NumberPickerProvider>
+    <chakra.div className="NumberPicker__root" __css={styles.root}>
+      <NumberPickerProvider value={context}>
+        <StylesProvider value={styles}>{children}</StylesProvider>
+      </NumberPickerProvider>
+    </chakra.div>
   )
 }
 
-// const StyledNumberPickerList = chakra("div", {
-//   themeKey: "NumberPicker.NumberPickerList",
-// })
-
-// export type NumberPickerListProps = PropsOf<typeof StyledNumberPickerList> &
-//   UseNumberPickerProps
 export type NumberPickerListProps = PropsOf<typeof VStack>
 export const NumberPickerList = (props: NumberPickerListProps) => {
-  return <VStack>{props.children}</VStack>
+  return <VStack display="inline-flex">{props.children}</VStack>
 }
 
 const StyledNumberPickerItem = chakra("button", {
-  themeKey: "Menu.MenuItem",
   baseStyle: {
     color: "inherit",
     userSelect: "none",
-    display: "flex",
+    display: "inline-flex",
     alignItems: "center",
     textAlign: "left",
     flex: "0 0 auto",
   },
-  pure: true,
 })
 
-export type NumberPickerItemProps = PropsOf<typeof StyledNumberPickerItem> & {
+export type NumberPickerItemProps = {
   optionValue: number
 }
 
 export const NumberPickerItem = (props: NumberPickerItemProps) => {
   const { optionValue } = props
   const strOptionValue = optionValue.toString().padStart(2, "0")
-  return <StyledNumberPickerItem>{strOptionValue}</StyledNumberPickerItem>
+  const styles = useStyles()
+
+  return (
+    <chakra.button
+      __css={{
+        color: "inherit",
+        userSelect: "none",
+        display: "flex",
+        width: "100%",
+        alignItems: "center",
+        textAlign: "left",
+        flex: "0 0 auto",
+        outline: 0,
+        ...styles.numberPickerItem,
+      }}
+    >
+      {strOptionValue}
+    </chakra.button>
+  )
+}
+
+export const NumberPickerIncrementStepper = () => {
+  return <IconButton aria-label="button" icon={<TriangleUpIcon />} />
 }

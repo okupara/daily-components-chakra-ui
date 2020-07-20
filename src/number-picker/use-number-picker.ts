@@ -20,13 +20,13 @@ export const useNumberPicker = (props: UseNumberPickerProps) => {
 
 type ReturnUseNumberPicker = ReturnType<typeof useNumberPicker>
 
-export const useNumberPickerInc = () => {}
-
-export const useNumberPickerDec = () => {}
-
 export type UseNumberPickerListProps = {}
 export const useNumberPickerList = (props: UseNumberPickerListProps) => {
   const context = useNumberPickerContext()
 }
 
-export const useNumberPickerOption = (props: any) => {}
+export const useNumberPickerItem = (props: any) => {}
+
+export type UseNumberPickerIncProps = {}
+
+export const useNumberPickerInc = (props: UseNumberPickerIncProps) => {}

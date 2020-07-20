@@ -79,11 +79,17 @@ export const useRangeSlider = (props: UseRangeSliderProps) => {
           left: `${trackValues[1]}%`,
           width: `${trackValues[0] - trackValues[1]}%`,
         }
+  // @TODO: We don't have to create thumbReact twice for each refs.
+  const rootStyle: React.CSSProperties = {
+    paddingTop: valuesState[0].thumbRect.height / 2,
+    paddingBottom: valuesState[0].thumbRect.height / 2,
+  }
 
   return {
     getRootProps: (props: Dict = {}) => ({
       ...props,
       ref: mergeRefs(props.ref, rootDomRef),
+      style: merge<React.CSSProperties>(props.style, rootStyle),
     }),
     getTrackProps: (props: Dict = {}) => ({
       ...props,

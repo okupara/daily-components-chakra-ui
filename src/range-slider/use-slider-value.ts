@@ -53,6 +53,7 @@ export const useSliderValue = (props: SliderValueProps) => {
 
   return {
     thumbRef,
+    thumbRect,
     id,
     value: computedValue,
     percentForValue,
