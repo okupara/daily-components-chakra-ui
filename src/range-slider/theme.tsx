@@ -12,6 +12,10 @@ const baseStyle: BaseStyle<typeof register> = (props) => {
       display: "inline-block",
       position: "relative",
       cursor: "pointer",
+      touchAction: "none",
+      WebkitTapHighlightColor: "rgba(0,0,0,0)",
+      userSelect: "none",
+      outline: 0,
     },
     rangeSliderTrack: {
       position: "absolute",

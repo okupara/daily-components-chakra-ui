@@ -10,7 +10,7 @@ import {
   RangeSliderTrack,
   RangeSliderFilledTrack,
   RangeSliderThumbs,
-} from "./range-slider"
+} from "../"
 import { Progress, ProgressLabel } from "@chakra-ui/progress"
 import { Box } from "@chakra-ui/core"
 

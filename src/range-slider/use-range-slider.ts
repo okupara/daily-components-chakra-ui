@@ -1,11 +1,31 @@
 import * as React from "react"
 import { UseSliderProps } from "@chakra-ui/slider"
-import { Dict, merge, mergeRefs } from "@chakra-ui/utils"
-import { useSliderValue } from "./use-slider-value"
-import { useDomEvents } from "./use-dom-events"
-import { useUpdateEffect } from "@chakra-ui/core"
+import {
+  Dict,
+  createContext,
+  getBox,
+  percentToValue,
+  valueToPercent,
+  mergeRefs,
+} from "@chakra-ui/utils"
+import { NumberTuple } from "./types"
+import { getDefaultValues, findClosestIndex } from "./utils"
+import {
+  useBoolean,
+  useEventListener,
+  useEventCallback,
+  useControllableState,
+} from "@chakra-ui/hooks"
 
-export type NumberTuple = [number, number]
+type RangeSliderContextType = StrictOmit<ReturnUseRangeType, "rootRef" | "props">
+
+const [RangeSliderProvider, useRangeSliderContext] = createContext<
+  RangeSliderContextType
+>({
+  name: "RangeSliderContext",
+  errorMessage: "useRangeSlider can only be used within RangeSlideProvider",
+})
+export { RangeSliderProvider, useRangeSliderContext }
 
 export type UseRangeSliderProps = Omit<
   UseSliderProps,
@@ -32,95 +52,96 @@ export const useRangeSlider = (props: UseRangeSliderProps) => {
 
   const rootRef = React.useRef<HTMLDivElement | null>(null)
   const trackRef = React.useRef<HTMLDivElement | null>(null)
+  const cleanupRef = React.useRef<Dict<Function>>({})
+  const prevValuesRef = React.useRef<NumberTuple>([0, 0])
+  const [isDragging, draggingDispatch] = useBoolean()
+  const isInteractive = !!(isDisabled || isReadOnly) === false
+  const [thumbRadius, setThumbRadius] = React.useState(0)
 
   const defaultValues = defaultValuesProp ?? getDefaultValues(min, max)
-  const valuesState = [
-    useSliderValue({
-      value: valuesProp ? valuesProp[0] : valuesProp,
-      defaultValue: defaultValues[0],
-      min,
-      max,
-      onChange: () => {},
-    }),
-    useSliderValue({
-      value: valuesProp ? valuesProp[1] : valuesProp,
-      defaultValue: defaultValues[1],
-      min,
-      max,
-      onChange: () => {},
-    }),
-  ]
-
-  const trackValues = [valuesState[0].value, valuesState[1].value] as const
-
-  useUpdateEffect(() => {
-    onChange?.(trackValues as NumberTuple)
-  }, trackValues)
-
-  const { rootDomRef, trackDomRef } = useDomEvents({
-    min,
-    max,
-    step,
-    valueStateTuple: [
-      { value: valuesState[0].value, updateValue: valuesState[0].updateValue },
-      { value: valuesState[1].value, updateValue: valuesState[1].updateValue },
-    ],
-    isInteractive: true,
-    value0: valuesState[0].value,
+  const [computedValue, setValue] = useControllableState({
+    value: valuesProp,
+    defaultValue: defaultValues,
+    onChange: () => {},
+    shouldUpdate: (numTuple, prevTuple) =>
+      numTuple.some((v, i) => v !== prevTuple[i]),
   })
 
-  const filledTrackStyles: React.CSSProperties =
-    trackValues[0] < trackValues[1]
-      ? {
-          left: `${trackValues[0]}%`,
-          width: `${trackValues[1] - trackValues[0]}%`,
-        }
-      : {
-          left: `${trackValues[1]}%`,
-          width: `${trackValues[0] - trackValues[1]}%`,
-        }
-  // @TODO: We don't have to create thumbReact twice for each refs.
-  const rootStyle: React.CSSProperties = {
-    paddingTop: valuesState[0].thumbRect.height / 2,
-    paddingBottom: valuesState[0].thumbRect.height / 2,
+  const getValueFromPointer = React.useCallback(
+    (event) => {
+      if (!trackRef.current) return
+      const trackRect = getBox(trackRef.current).borderBox
+      const { clientX, clientY } = event.touches?.[0] ?? event
+      const diff = clientX - trackRect.left
+      const length = trackRect.width
+      const percent = diff / length
+      const nextValue = percentToValue(percent, min, max)
+      return nextValue
+    },
+    [min, max, step],
+  )
+
+  prevValuesRef.current = computedValue // might be unnecessary?
+
+  const onMouseDown = useEventCallback((event: MouseEvent) => {
+    if (!isInteractive || !rootRef.current) return
+    draggingDispatch.on()
+
+    const run = (event: MouseEvent) => {
+      const nextValue = getValueFromPointer(event)
+      if (nextValue && !prevValuesRef.current?.includes(nextValue)) {
+        const index = findClosestIndex(nextValue, prevValuesRef.current)
+        setValue(
+          prevValuesRef.current.map((v, i) =>
+            i === index ? nextValue : v,
+          ) as NumberTuple,
+        )
+      }
+    }
+
+    run(event)
+    const doc = rootRef.current.ownerDocument
+
+    doc.addEventListener("mousemove", run)
+
+    const detachMousemmove = () => {
+      doc.removeEventListener("mousemove", run)
+      draggingDispatch.off()
+    }
+
+    doc.addEventListener("mouseup", detachMousemmove)
+    cleanupRef.current.mouseup = () => {
+      doc.removeEventListener("mouseup", detachMousemmove)
+    }
+  })
+
+  cleanupRef.current.mouseDown = useEventListener(
+    "mousedown",
+    onMouseDown,
+    rootRef.current as Document | null,
+  )
+
+  const percents = React.useMemo(
+    () => computedValue.map((v) => valueToPercent(v, min, max)),
+    computedValue,
+  )
+  const computedStyle: React.CSSProperties = {
+    paddingTop: `${thumbRadius}px`,
+    paddingBottom: `${thumbRadius}px`,
   }
 
   return {
-    getRootProps: (props: Dict = {}) => ({
-      ...props,
-      ref: mergeRefs(props.ref, rootDomRef),
-      style: merge<React.CSSProperties>(props.style, rootStyle),
-    }),
-    getTrackProps: (props: Dict = {}) => ({
-      ...props,
-      ref: mergeRefs(props.ref, trackDomRef),
-    }),
-    getFilledTrackProps: (props: Dict = {}) => ({
-      ...props,
-      style: merge<React.CSSProperties>(props.style, filledTrackStyles),
-    }),
-    getThumbProps: (props: Dict = {}) =>
-      valuesState.map((s) => ({
-        ...props,
-        ref: s.thumbRef,
-        style: merge<React.CSSProperties>(props.style, s.thumbStyle),
-      })),
-    getInputProps: (props: Dict = {}) => ({
-      ...props,
-      type: "hidden",
-    }),
-    getValues: () => [valuesState[0].value, valuesState[1].value],
+    values: computedValue,
+    percents,
+    trackRef,
+    isDragging,
+    rootRef,
+    setThumbRadius,
+    props: {
+      ref: mergeRefs(rootRef),
+      style: computedStyle,
+    },
   }
 }
 
 export type ReturnUseRangeType = ReturnType<typeof useRangeSlider>
-
-export const getDefaultValues = (min: number, max: number): NumberTuple => {
-  if (min >= max) {
-    throw new Error("The max value should be bigger than the min value")
-  }
-  const centerDiff = (max - min) / 2
-  const lowValue = min + centerDiff / 2
-  const hiValue = min + centerDiff + centerDiff / 2
-  return [lowValue, hiValue]
-}
