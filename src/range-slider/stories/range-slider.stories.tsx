@@ -15,12 +15,14 @@ import { Progress, ProgressLabel } from "@chakra-ui/progress"
 import { Box } from "@chakra-ui/core"
 
 export const rangeSlider = () => (
-  <RangeSlider onChange={(a) => console.log(a)}>
-    <RangeSliderTrack>
-      <RangeSliderFilledTrack />
-    </RangeSliderTrack>
-    <RangeSliderThumbs />
-  </RangeSlider>
+  <Box mt={20}>
+    <RangeSlider onChange={(a) => console.log(a)}>
+      <RangeSliderTrack>
+        <RangeSliderFilledTrack />
+      </RangeSliderTrack>
+      <RangeSliderThumbs />
+    </RangeSlider>
+  </Box>
 )
 rangeSlider.story = {
   name: "rangeSlider",
@@ -28,12 +30,14 @@ rangeSlider.story = {
 
 export const slider = () => {
   return (
-    <Slider defaultValue={30}>
-      <SliderTrack>
-        <SliderFilledTrack />
-      </SliderTrack>
-      <SliderThumb />
-    </Slider>
+    <Box mt={20}>
+      <Slider defaultValue={30}>
+        <SliderTrack>
+          <SliderFilledTrack />
+        </SliderTrack>
+        <SliderThumb />
+      </Slider>
+    </Box>
   )
 }
 

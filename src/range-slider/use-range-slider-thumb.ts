@@ -1,5 +1,6 @@
 import * as React from "react"
 import { useId, useDimensions, useUpdateEffect } from "@chakra-ui/hooks"
+import { mergeRefs } from "@chakra-ui/utils"
 
 export type UseRangeSliderThumbProps = {
   value: number
@@ -35,6 +36,31 @@ export const useRangeSliderThumb = (props: UseRangeSliderThumbProps) => {
   return {
     id,
     ref: thumbRef,
+    style,
+  }
+}
+
+export type UseThumbTooltipProps = {
+  percentValue: number
+}
+
+export const useRangeSliderThumbTip = (props: UseThumbTooltipProps) => {
+  const { percentValue } = props
+  const ref = React.useRef<HTMLDivElement | null>(null)
+  const id = useId("range-slider-tooltip")
+
+  const refBox = useDimensions(ref)
+
+  const boxCenter = refBox ? Math.floor(refBox.borderBox.width / 2) : 0
+  const boxYPos = refBox ? refBox.borderBox.height + 12 : 0
+  const style: React.CSSProperties = {
+    left: `calc(${percentValue}% - ${boxCenter}px)`,
+    top: `-${boxYPos}px`,
+  }
+
+  return {
+    id,
+    ref,
     style,
   }
 }
