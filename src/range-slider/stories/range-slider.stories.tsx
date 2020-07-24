@@ -13,6 +13,8 @@ import {
 } from "../"
 import { Progress, ProgressLabel } from "@chakra-ui/progress"
 import { Box } from "@chakra-ui/core"
+import { Tooltip } from "@chakra-ui/tooltip"
+import { Button } from "@chakra-ui/button"
 
 export const rangeSlider = () => (
   <Box mt={20}>
@@ -37,6 +39,16 @@ export const slider = () => {
         </SliderTrack>
         <SliderThumb />
       </Slider>
+    </Box>
+  )
+}
+
+export const tooltip = () => {
+  return (
+    <Box m={20}>
+      <Tooltip label="hey im here" isOpen hasArrow>
+        <Button>aaaa</Button>
+      </Tooltip>
     </Box>
   )
 }

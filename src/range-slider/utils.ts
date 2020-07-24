@@ -1,4 +1,5 @@
 import type { NumberTuple } from "./types"
+import type { Placement } from "@chakra-ui/popper"
 
 export function getDefaultValue(min: number, max: number) {
   return max < min ? min : min + (max - min) / 2
