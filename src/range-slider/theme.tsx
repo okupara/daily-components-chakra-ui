@@ -37,7 +37,7 @@ export default multiStyleConfig({
         zIndex: 1,
         borderRadius: "full",
         bg: "white",
-        boxShadow: "sm",
+        boxShadow: "base",
         border: "1px solid",
         borderColor: "transparent",
         transition: "transform 0.2s",
