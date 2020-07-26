@@ -2,6 +2,7 @@ import * as React from "react"
 import {
   chakra,
   useStyleConfig,
+  useMultiStyleConfig,
   PropsOf,
   StylesProvider,
   omitThemingProps,
@@ -21,7 +22,8 @@ const RangeSliderComponent = React.forwardRef(function RangeSlider(
 ) {
   const realProps = omitThemingProps(props)
   const { rootRef, props: rootProps, ...context } = useRangeSlider(realProps)
-  const styles = useStyleConfig("RangeSlider", props)
+  const styles = useMultiStyleConfig("RangeSlider", props)
+  console.log("chakra", chakra.div)
 
   return (
     <RangeSliderProvider value={context}>

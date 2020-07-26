@@ -6,6 +6,7 @@ import {
   NumberPickerList,
   NumberPickerItem,
   NumberPickerIncrementStepper,
+  NumberPickerDecrementStepper,
 } from "./number-picker"
 
 export const numberPicker = () => {
@@ -18,6 +19,7 @@ export const numberPicker = () => {
             <NumberPickerItem key={i} optionValue={i + 1} />
           ))}
         </NumberPickerList>
+        <NumberPickerDecrementStepper />
       </NumberPicker>
     </Box>
   )

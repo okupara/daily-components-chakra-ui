@@ -55,47 +55,34 @@ export function RangeSliderThumb(props: RangeSliderThumbProps) {
     percentValue,
   })
   const tooltipStyles = useStyleConfig("Tooltip", props)
-  const transitions = useTransitionConfig("Tooltip", props, {
-    container: "chakra-tooltip",
-  })
+  //   const transitions = useTransitionConfig("Tooltip", props, {
+  //     container: "chakra-tooltip",
+  //   })
   const hasAriaLabel = !!ariaLabel
 
   return (
     <>
-      <HiddenTransition
-        classNames={transitions.container.className}
-        timeout={transitions.container.timeout}
-        appear
-        unmountOnExit
-        in={isOpen}
-        nodeRef={tooltipBodyProps.ref}
+      <chakra.div
+        {...tooltipBodyProps}
+        __css={{
+          position: "absolute",
+          zIndex: 4,
+          ...tooltipStyles,
+        }}
       >
-        <chakra.div
-          className={transitions.container.className}
-          {...tooltipBodyProps}
-          __css={{
-            position: "absolute",
-            zIndex: 4,
-            ...tooltipStyles.container,
-            ...transitions.container.styles,
-            // ...computedTooltipStyles,
-          }}
-        >
-          {Math.floor(value)}
-          {/* {hasAriaLabel && (
+        {Math.floor(value)}
+        {/* {hasAriaLabel && (
             <VisuallyHidden {...hiddenProps}>{ariaLabel}</VisuallyHidden>
           )} */}
 
-          <chakra.div
-            className="chakra-tooltip__arrow"
-            {...tooltipArrowProps}
-            __css={{
-              bg: "inherit",
-              ...tooltipStyles.arrow,
-            }}
-          />
-        </chakra.div>
-      </HiddenTransition>
+        <chakra.div
+          className="chakra-tooltip__arrow"
+          {...tooltipArrowProps}
+          __css={{
+            bg: "inherit",
+          }}
+        />
+      </chakra.div>
 
       <StyledRangeSliderThumb
         {...thumbProps}

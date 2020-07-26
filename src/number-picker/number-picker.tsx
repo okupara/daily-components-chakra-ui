@@ -3,11 +3,11 @@ import {
   chakra,
   PropsOf,
   useStyles,
-  useStyleConfig,
+  useMultiStyleConfig,
   StylesProvider,
 } from "@chakra-ui/system"
 import { VStack } from "@chakra-ui/layout"
-import { TriangleUpIcon } from "@chakra-ui/icons"
+import { TriangleUpIcon, TriangleDownIcon } from "@chakra-ui/icons"
 import { IconButton } from "@chakra-ui/button"
 import {
   useNumberPicker,
@@ -25,7 +25,7 @@ export const NumberPicker = (props: NumberPickerProps) => {
   const { value, defaultValue, children, ...rest } = props
 
   const context = useNumberPicker({ value, defaultValue })
-  const styles = useStyleConfig("NumberPicker", props)
+  const styles = useMultiStyleConfig("NumberPicker", props)
 
   return (
     <chakra.div className="NumberPicker__root" __css={styles.root}>
@@ -37,8 +37,9 @@ export const NumberPicker = (props: NumberPickerProps) => {
 }
 
 export type NumberPickerListProps = PropsOf<typeof VStack>
-export const NumberPickerList = (props: NumberPickerListProps) => {
-  return <VStack display="inline-flex">{props.children}</VStack>
+export function NumberPickerList(props: NumberPickerListProps) {
+  // return <VStack display="inline-flex">{props.children}</VStack>
+  return <chakra.div></chakra.div>
 }
 
 const StyledNumberPickerItem = chakra("button", {
@@ -82,4 +83,8 @@ export const NumberPickerItem = (props: NumberPickerItemProps) => {
 
 export const NumberPickerIncrementStepper = () => {
   return <IconButton aria-label="button" icon={<TriangleUpIcon />} />
+}
+
+export const NumberPickerDecrementStepper = () => {
+  return <IconButton aria-label="button" icon={<TriangleDownIcon />} />
 }
