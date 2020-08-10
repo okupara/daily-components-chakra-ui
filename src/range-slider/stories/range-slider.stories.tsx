@@ -58,7 +58,7 @@ export const progress = () => {
     <React.Fragment>
       <Box p={10}>
         <Progress>
-          <ProgressLabel size="lg">hello</ProgressLabel>
+          <ProgressLabel />
         </Progress>
       </Box>
       <Box p={10}>
